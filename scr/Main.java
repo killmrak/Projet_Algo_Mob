@@ -22,7 +22,7 @@ public class Main {
 
         // Add sensors
         tp.setDefaultNodeModel(Sensor.class);
-        tp.fromFile("/absolute-path/sensors.tp"); // to be adapted
+        tp.fromFile("/net/cremi/atruong/sensors.tp"); // to be adapted
 
         // Add base station
         tp.addNode(100, 80, new BaseStation());

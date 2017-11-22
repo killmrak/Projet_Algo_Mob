@@ -3,7 +3,7 @@ import jbotsim.Node;
 public class Robot extends WaypointNode {
     @Override
     public void onStart() {
-        setIcon("/your-package/robot.png"); // to be adapted
+        setIcon("/images/robot.png"); // to be adapted
         setSensingRange(30);
         onArrival();
     }
