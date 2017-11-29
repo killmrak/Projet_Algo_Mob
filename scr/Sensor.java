@@ -5,6 +5,7 @@ import org.jcp.xml.dsig.internal.SignerOutputStream;
 import java.awt.*;
 
 public class Sensor extends Node {
+    public static double TEMPS_ENVOI = 0.08;
     Node parent = null;
     int battery = 255;
 
@@ -49,7 +50,7 @@ public class Sensor extends Node {
     @Override
     public void onClock() {
         if (parent != null) { // if already in the tree
-            if (Math.random() < 0.02) { // from time to time...
+            if (Math.random() < TEMPS_ENVOI) { // from time to time...
                 double sensedValue = Math.random(); // sense a value
                 send(parent, new Message(sensedValue, "SENSING")); // send it to parent
             }
