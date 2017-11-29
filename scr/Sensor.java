@@ -1,5 +1,6 @@
 import jbotsim.Message;
 import jbotsim.Node;
+import org.jcp.xml.dsig.internal.SignerOutputStream;
 
 import java.awt.*;
 
@@ -7,6 +8,7 @@ public class Sensor extends Node {
     Node parent = null;
     int battery = 255;
 
+    boolean bool = false;
     @Override
     public void onMessage(Message message) {
         // "INIT" flag : construction of the spanning tree
@@ -34,6 +36,14 @@ public class Sensor extends Node {
             battery--;
             updateColor();
         }
+        else {
+            if(!bool){
+                bool = true;
+                System.out.println(this.toString());
+                //System.out.println(this.getLocation().toString());
+            }
+        }
+
     }
 
     @Override
