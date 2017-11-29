@@ -42,20 +42,23 @@ public class Sensor extends Node {
                 for (Node n : this.getNeighbors()){
                     if(n instanceof Sensor) {
                         Sensor tmp = (Sensor) n;
-                        if (((Sensor) n).parent == this) {
+                        if (tmp.parent == this) {
                             countNbChild++;
+                            System.out.println(tmp.lstEnfant.size());
                         }
                     }
                 }
             }
             // retransmit up the tree
             lstEnfant.add((Sensor) message.getSender());
-         //   nbChild.add(1);
+            // nbChild.add(1);
             nbChild++;
 
             if(nbChild == countNbChild){
+                System.out.println(this.getID() + " nbChild " + countNbChild);
                 for(Sensor s : lstEnfant){
                     nbChild += s.nbChild;
+                    //System.out.println(s.nbChild);
                 }
             }
         }
@@ -73,7 +76,8 @@ public class Sensor extends Node {
             if (!bool){
                 bool = true;
                 //System.out.println(toString());
-                System.out.println(nbChild);
+                //System.out.println(nbChild);
+                //System.out.println(initChild());
             }
         }
     }
@@ -107,7 +111,20 @@ public class Sensor extends Node {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-        result.append(getNeighbors().size());
+        result.append(initChild());
         return result.toString();
+    }
+
+    int initChild(){
+        int tmp = 0;
+        if(this.lstEnfant.size() == 0){
+            return 1;
+        }
+        else{
+            for (Sensor s : lstEnfant){
+                tmp += s.initChild();
+            }
+        }
+        return tmp +1;
     }
 }

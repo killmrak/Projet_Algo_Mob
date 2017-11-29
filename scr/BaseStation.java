@@ -26,7 +26,10 @@ public class BaseStation extends Node {
     @Override
     public void onClock() {
         if (lstEnfant.size() == this.getNeighbors().size()){
+
             sendAll(new Message(null,"NBCHILD"));
         }
     }
+
+
 }
