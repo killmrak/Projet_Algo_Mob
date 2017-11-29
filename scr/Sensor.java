@@ -4,12 +4,17 @@ import org.jcp.xml.dsig.internal.SignerOutputStream;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Sensor extends Node {
-    public static double TEMPS_ENVOI = 0.04;
+    public static double TEMPS_ENVOI = 2;
     Node parent = null;
     int battery = 255;
+
     ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
+  //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
+    int nbChild = 0;
+    int countNbChild = 0;
 
     boolean bool = false;
     @Override
@@ -26,7 +31,6 @@ public class Sensor extends Node {
                 // propagate further
                 sendAll(message);
                 send(parent, new Message(null,"CHILD"));
-
             }
         } else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
@@ -34,8 +38,26 @@ public class Sensor extends Node {
         }
         // I/a -> exploration de l'arbre
          else if (message.getFlag().equals("CHILD")) {
+            if(countNbChild == 0){
+                for (Node n : this.getNeighbors()){
+                    if(n instanceof Sensor) {
+                        Sensor tmp = (Sensor) n;
+                        if (((Sensor) n).parent == this) {
+                            countNbChild++;
+                        }
+                    }
+                }
+            }
             // retransmit up the tree
             lstEnfant.add((Sensor) message.getSender());
+         //   nbChild.add(1);
+            nbChild++;
+
+            if(nbChild == countNbChild){
+                for(Sensor s : lstEnfant){
+                    nbChild += s.nbChild;
+                }
+            }
         }
     }
 
@@ -50,7 +72,8 @@ public class Sensor extends Node {
         else{
             if (!bool){
                 bool = true;
-                System.out.println(toString());
+                //System.out.println(toString());
+                System.out.println(nbChild);
             }
         }
     }
@@ -68,7 +91,7 @@ public class Sensor extends Node {
     protected void updateColor() {
         setColor(battery == 0 ? Color.red : new Color(255 - battery, 255 - battery, 255));
     }
-
+    /*
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
@@ -77,6 +100,14 @@ public class Sensor extends Node {
             result.append(tmp.getID() + ", ");
         }
         result.append("\n");
+        return result.toString();
+    }
+    */
+
+    @Override
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append(getNeighbors().size());
         return result.toString();
     }
 }
