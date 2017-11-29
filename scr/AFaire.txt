@@ -1,0 +1,58 @@
+I/ Etablir la topologie :
+    - a) Etablir les liens parents/enfants
+        - rand = 3 -> rand 1: message envoyer à ces liens
+                      rand 2: noeud envoie un message à son parent
+                      rand 3: parent reçoit tous les messages de ces enfants
+                      rand 4 : rien
+
+    - b) Chaque parent connait ces enfants
+        - un enfant envoie une list "init"
+            - objet "init" :
+                - coordonnée du noeud
+                - list init
+                - nombre de fils
+        - un parent attend tous les inits de ces enfants avant de transmettre à son parent
+    - c ) Dans le onMessage, faire un if sur le nouveau type
+
+II/ Etablir l'intervalle d'envoie des "SENSING"
+
+III Etablir un tableau de distance entre les noeuds
+
+
+Stratégie:
+    - par zone : défini par le nombre de fils
+    - proba : grace au calcul de l'intervalle d'envoie
+
+
+    -
+
+Amélioration :
+    - robot qui repart dès que sa zone touche le point (~1-2)
+    - Choix des meilleurs routes
+
+
+Details :
+    - I/a) Parcours randoms dans une zone prioritaire
+
+    - BaseStation :
+        - Tableau de distance : "pas sur" (entre les noeuds)
+        - Arbre de noeud -> arbre global
+        - Zone de priorité
+            - arbre / tableau -> définir une structure
+        - Arbre max de nb de fils
+        -
+
+    - Robot :
+        -
+
+Partie 2:
+Pour le crash:
+    - accuser pour la reception des messages
+    si crash :
+        - on recupère le noeud mort
+            - on prend les enfants
+                - on leur donne un nouveau parent : le plus proche encore en marche
+                    - si plusieurs posssible
+                        - A VOIR
+                    - on notifie la baseStation
+                        - A VOIR
