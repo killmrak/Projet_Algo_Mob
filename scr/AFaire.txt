@@ -13,16 +13,34 @@ I/ Etablir la topologie :
                 - nombre de fils
         - un parent attend tous les inits de ces enfants avant de transmettre à son parent
     - c ) Dans le onMessage, faire un if sur le nouveau type
+        - + boolean qui permet de ne faire le init une seule fois.
 
 II/ Etablir l'intervalle d'envoie des "SENSING"
+    - intervalle (Math.random() < 0.02)
 
 III Etablir un tableau de distance entre les noeuds
+    - Structure qui contient la distance entre deux noeuds sous forme de tableau
 
 
 Stratégie:
     - par zone : défini par le nombre de fils
-    - proba : grace au calcul de l'intervalle d'envoie
+        - Cas du début :
+            - random dans cette zone jusque'a que "init" soit terminer
+            - Cas général :
+                - les robots parcours la zone prioritaire
+            - Cas secondaire :
+                - Cas des zones :
+                    - zones : 1 : prioritaire max
+                        - toujours un robot
+                        - parcours par rapport au niveau de la batterie
+                    - zones : 2 : normal
+                        - une fois la zone 1 valider, un robot recharge cette zone
+                    - zones : 3 : feuille ou/et parents = 1
+                        - 2 fois la zone 2 valider
+                            - retour zone 1 ou 2
 
+    - proba : grace au calcul de l'intervalle d'envoie et le nombre de fils
+        - A VOIR
 
     -
 
@@ -35,8 +53,8 @@ Details :
     - I/a) Parcours randoms dans une zone prioritaire
 
     - BaseStation :
-        - Tableau de distance : "pas sur" (entre les noeuds)
-        - Arbre de noeud -> arbre global
+        - Structure de distance : "pas sur" (entre les noeuds)
+        - Structure de noeud -> arbre global
         - Zone de priorité
             - arbre / tableau -> définir une structure
         - Arbre max de nb de fils

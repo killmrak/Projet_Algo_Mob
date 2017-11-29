@@ -2,12 +2,14 @@ import jbotsim.Message;
 import jbotsim.Node;
 import org.jcp.xml.dsig.internal.SignerOutputStream;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.ArrayList;
 
 public class Sensor extends Node {
-    public static double TEMPS_ENVOI = 0.08;
+    public static double TEMPS_ENVOI = 0.04;
     Node parent = null;
     int battery = 255;
+    ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
 
     boolean bool = false;
     @Override
@@ -23,10 +25,17 @@ public class Sensor extends Node {
                 getCommonLinkWith(parent).setWidth(4);
                 // propagate further
                 sendAll(message);
+                send(parent, new Message(null,"CHILD"));
+
             }
         } else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
             send(parent, message);
+        }
+        // I/a -> exploration de l'arbre
+         else if (message.getFlag().equals("CHILD")) {
+            // retransmit up the tree
+            lstEnfant.add((Sensor) message.getSender());
         }
     }
 
@@ -36,15 +45,14 @@ public class Sensor extends Node {
             super.send(destination, message);
             battery--;
             updateColor();
+            toString();
         }
-        else {
-            if(!bool){
+        else{
+            if (!bool){
                 bool = true;
-                System.out.println(this.toString());
-                //System.out.println(this.getLocation().toString());
+                System.out.println(toString());
             }
         }
-
     }
 
     @Override
@@ -59,5 +67,16 @@ public class Sensor extends Node {
 
     protected void updateColor() {
         setColor(battery == 0 ? Color.red : new Color(255 - battery, 255 - battery, 255));
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("Début : " + this.getID() + ", ");
+        for(Sensor tmp : lstEnfant){
+            result.append(tmp.getID() + ", ");
+        }
+        result.append("\n");
+        return result.toString();
     }
 }
