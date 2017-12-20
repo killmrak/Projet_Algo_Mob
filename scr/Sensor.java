@@ -14,7 +14,9 @@ public class Sensor extends Node {
     ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
   //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
     int nbChild = 0;
+    int nbRetourEnfant = 0;
     int countNbChild = 0;
+    int profondeur = 1;
 
     boolean bool = false;
     @Override
@@ -30,36 +32,56 @@ public class Sensor extends Node {
                 getCommonLinkWith(parent).setWidth(4);
                 // propagate further
                 sendAll(message);
-                send(parent, new Message(null,"CHILD"));
+                send(parent, new Message(null,"INIT"));
             }
+            else{
+                if(((Sensor) message.getSender()).parent == this){
+                    lstEnfant.add((Sensor) message.getSender());
+                }
+            }
+            //lstEnfant.
         } else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
             send(parent, message);
         }
         // I/a -> exploration de l'arbre
-         else if (message.getFlag().equals("CHILD")) {
+         else if (message.getFlag().equals("NBCHILD")) {
             if(countNbChild == 0){
+                System.out.println(countNbChild+ "  COUNT_START ");
                 for (Node n : this.getNeighbors()){
                     if(n instanceof Sensor) {
-                        Sensor tmp = (Sensor) n;
-                        if (tmp.parent == this) {
+                        if (((Sensor) n).parent == this) {
+
                             countNbChild++;
-                            System.out.println(tmp.lstEnfant.size());
+                            lstEnfant.add((Sensor) n);
+                            //System.out.println("SIZE, nbchild" + ((Sensor) n).lstEnfant.size());
                         }
                     }
                 }
+                System.out.println(getID() + " " +lstEnfant.size());
+                System.out.println(countNbChild+ "  COUNT_END " );
             }
-            // retransmit up the tree
-            lstEnfant.add((Sensor) message.getSender());
-            // nbChild.add(1);
-            nbChild++;
+            for(Sensor s : lstEnfant){
+                send(s, message);
+            }
 
-            if(nbChild == countNbChild){
-                System.out.println(this.getID() + " nbChild " + countNbChild);
-                for(Sensor s : lstEnfant){
-                    nbChild += s.nbChild;
-                    //System.out.println(s.nbChild);
-                }
+         //  System.out.println(countNbChild+ "  COUNT");
+            if(countNbChild == 0){
+                //System.out.println("dedansgggggggggggggg/n");
+                send(parent, new Message(null, "RETOURENFANT"));
+            }
+        }
+        else if (message.getFlag().equals("RETOURENFANT")) {
+            //System.out.println("dedans/n");
+            //System.out.println(nbRetourEnfant + " " + nbChild +"/n");
+            if(nbRetourEnfant != nbChild){
+                nbRetourEnfant++;
+            }
+            else{
+                //System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh /n");
+                for (Sensor s : lstEnfant)
+                    profondeur += s.profondeur;
+                //send(parent, new Message(null, "RETOURENFANT"));
             }
         }
     }
@@ -75,9 +97,11 @@ public class Sensor extends Node {
         else{
             if (!bool){
                 bool = true;
-                //System.out.println(toString());
-                //System.out.println(nbChild);
-                //System.out.println(initChild());
+                /*
+                System.out.print("end " + getID() + " ");
+                System.out.print(nbChild + " ");
+                System.out.print(profondeur+ "\n");
+                */
             }
         }
     }
@@ -111,7 +135,7 @@ public class Sensor extends Node {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-        result.append(initChild());
+        result.append(profondeur);
         return result.toString();
     }
 
