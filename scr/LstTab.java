@@ -1,9 +1,8 @@
 import java.util.*;
 
 public class LstTab {
-    Map<Integer, List<Info>> lstEnfants = new HashMap<Integer, List<Info>>();
     BaseStation bs;
-
+    Map<Integer, List<Sensor>> arbreDesProfondeur = new HashMap<>();
     LstTab(BaseStation bs){
         this.bs = bs;
         init();
@@ -16,33 +15,50 @@ public class LstTab {
 
 
         initLstEnf();
+        System.out.println(toString());
     }
 
     void initLstEnf(){
         for (Sensor s : bs.lstEnfant)
-            initLstEnf(s, 0);
+            initLstEnf(s, arbreDesProfondeur);
     }
 
-    void initLstEnf(Sensor s, int profobdeurArbre){
-        List<Info> lst= new ArrayList<Info>();
-        lstEnfants.put(profobdeurArbre, lst);
-        //lstEnfants.put(profobdeurArbre, new Info(s.getID(), s.nbChild, s.profondeur));
-        for (Sensor tmp : s.lstEnfant){
-            initLstEnf(tmp, profobdeurArbre++);
+    void initLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre){
+        if(arbre.containsKey(s.profondeur)){
+            Set<Map.Entry<Integer, List<Sensor>>> setHm = arbreDesProfondeur.entrySet();
+            Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
+            while(it.hasNext()){
+                Map.Entry<Integer, List<Sensor>> e = it.next();
+                if(e.getKey() == s.profondeur){
+                    e.getValue().add(s);
+                    break;
+                }
+            }
         }
+        else{
+            List<Sensor> tmp = new ArrayList<>();
+            tmp.add(s);
+            arbre.put(s.profondeur, tmp);
+        }
+        if(s.lstEnfant.size() != 0)
+            for (Sensor ss : s.lstEnfant)
+                initLstEnf(ss, arbre);
     }
 
     @Override
     public String toString() {
         StringBuffer tmp = new StringBuffer();
-/*
-        Set<Map.Entry<Integer, Info>> setHm = lstEnfants.entrySet();
-        Iterator<Map.Entry<Integer, Info>> it = setHm.iterator();
-        while(it.hasNext()){
-            Map.Entry<Integer, Info> e = it.next();
-            tmp.append(e.getKey() + " : " + e.getValue().toString());
 
-        }*/
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = arbreDesProfondeur.entrySet();
+        Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
+        while(it.hasNext()){
+            Map.Entry<Integer, List<Sensor>> e = it.next();
+            tmp.append(e.getKey() + " : valeur : " );
+            for (int i = 0; i < e.getValue().size(); i++){
+                tmp.append(e.getValue().get(i).getID() + ", ");
+            }
+            tmp.append("\n");
+        }
         return tmp.toString();
     }
 }

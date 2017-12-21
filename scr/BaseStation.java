@@ -6,7 +6,8 @@ import java.util.ArrayList;
 public class BaseStation extends Node {
     ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
     LstTab lstTab;
-    boolean bool = true;
+    boolean initNbChild = true;
+    int cpt = 0;
     @Override
     public void onStart() {
         setIcon("/images/server.png"); // to be adapted
@@ -25,21 +26,24 @@ public class BaseStation extends Node {
             System.out.println(((Sensor) message.getSender()).getID() + " MESSAGE");
         }
         else if (message.getFlag().equals("RETOURENFANT")) {
-            //System.out.println("Base " + this.getID() + " " +  message.getSender().getID());
+            System.out.println("Base " + this.getID() + " " +  message.getSender().getID());
+            cpt++;
+            if(cpt == lstEnfant.size())
+                lstTab = new LstTab(this);
         }
     }
 
     @Override
     public void onClock() {
-        if(bool) {
+        if(initNbChild) {
             if (lstEnfant.size() == this.getNeighbors().size()) {
                 System.out.println(" MESSAGE2");
                 sendAll(new Message(null, "NBCHILD"));
 
-                lstTab = new LstTab(this);
+                //lstTab = new LstTab(this);
                 //lstTab.init(this);
                 // System.out.println(toString());
-                bool = false;
+                initNbChild = false;
             }
 
         }
