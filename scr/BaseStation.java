@@ -24,12 +24,15 @@ public class BaseStation extends Node {
             lstEnfant.add((Sensor) message.getSender());
             System.out.println(((Sensor) message.getSender()).getID() + " MESSAGE");
         }
+        else if (message.getFlag().equals("RETOURENFANT")) {
+            //System.out.println("Base " + this.getID() + " " +  message.getSender().getID());
+        }
     }
 
     @Override
     public void onClock() {
         if(bool) {
-            if (lstEnfant.size() /2 == this.getNeighbors().size()) {
+            if (lstEnfant.size() == this.getNeighbors().size()) {
                 System.out.println(" MESSAGE2");
                 sendAll(new Message(null, "NBCHILD"));
 

@@ -5,6 +5,7 @@ import org.jcp.xml.dsig.internal.SignerOutputStream;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Sensor extends Node {
     public static double TEMPS_ENVOI = 2;
@@ -18,7 +19,8 @@ public class Sensor extends Node {
     int countNbChild = 0;
     int profondeur = 1;
 
-    boolean bool = false;
+    boolean sensorMort = false;
+    boolean tousRetournementRecu = false;
     @Override
     public void onMessage(Message message) {
         // "INIT" flag : construction of the spanning tree
@@ -32,13 +34,15 @@ public class Sensor extends Node {
                 getCommonLinkWith(parent).setWidth(4);
                 // propagate further
                 sendAll(message);
-                send(parent, new Message(null,"INIT"));
+                //send(parent, new Message(null,"INIT"));
             }
+            /*
             else{
                 if(((Sensor) message.getSender()).parent == this){
                     lstEnfant.add((Sensor) message.getSender());
                 }
             }
+            */
             //lstEnfant.
         } else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
@@ -47,19 +51,20 @@ public class Sensor extends Node {
         // I/a -> exploration de l'arbre
          else if (message.getFlag().equals("NBCHILD")) {
             if(countNbChild == 0){
-                System.out.println(countNbChild+ "  COUNT_START ");
+                //System.out.println(countNbChild+ "  COUNT_START ");
                 for (Node n : this.getNeighbors()){
                     if(n instanceof Sensor) {
                         if (((Sensor) n).parent == this) {
-
                             countNbChild++;
                             lstEnfant.add((Sensor) n);
+                            //System.out.println(getID() + " " + ((Sensor) n).getID() + " " +lstEnfant.size());
                             //System.out.println("SIZE, nbchild" + ((Sensor) n).lstEnfant.size());
                         }
                     }
                 }
-                System.out.println(getID() + " " +lstEnfant.size());
-                System.out.println(countNbChild+ "  COUNT_END " );
+
+                //System.out.println(getID() + " " +lstEnfant.size());
+                //System.out.println(lstEnfant.size()+ "  COUNT_END " );
             }
             for(Sensor s : lstEnfant){
                 send(s, message);
@@ -67,21 +72,22 @@ public class Sensor extends Node {
 
          //  System.out.println(countNbChild+ "  COUNT");
             if(countNbChild == 0){
-                //System.out.println("dedansgggggggggggggg/n");
+                //System.out.println("dedansgggggggggggggg");
                 send(parent, new Message(null, "RETOURENFANT"));
             }
         }
         else if (message.getFlag().equals("RETOURENFANT")) {
             //System.out.println("dedans/n");
-            //System.out.println(nbRetourEnfant + " " + nbChild +"/n");
-            if(nbRetourEnfant != nbChild){
+            //System.out.println( this.getID() + " " +  message.getSender().getID() + " " + this.lstEnfant.size() + " " + nbRetourEnfant + " " + countNbChild);
+            if(nbRetourEnfant != countNbChild){
                 nbRetourEnfant++;
             }
-            else{
-                //System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh /n");
+             if (nbRetourEnfant == countNbChild && !tousRetournementRecu){
+                //System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh ");
                 for (Sensor s : lstEnfant)
                     profondeur += s.profondeur;
-                //send(parent, new Message(null, "RETOURENFANT"));
+                send(parent, new Message(null, "RETOURENFANT"));
+                tousRetournementRecu = true;
             }
         }
     }
@@ -95,8 +101,8 @@ public class Sensor extends Node {
             toString();
         }
         else{
-            if (!bool){
-                bool = true;
+            if (!sensorMort){
+                sensorMort = true;
                 /*
                 System.out.print("end " + getID() + " ");
                 System.out.print(nbChild + " ");
