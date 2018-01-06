@@ -31,8 +31,16 @@ public class Sensor extends Node {
                 parent = message.getSender();
                 getCommonLinkWith(parent).setWidth(4);
                 // propagate further
-                sendAll(message);
+                //sendAll(message);
                 //send(parent, new Message(null,"INIT"));
+                for (Node voisins : this.getNeighbors()) {
+                    if (voisins instanceof Sensor)
+                        if (((Sensor) voisins).parent == null) {
+                            send(voisins, message);
+                        }
+                }
+                if(parent instanceof BaseStation)
+                    send(parent, new Message(null,"INIT"));
             }
 
             //lstEnfant.
@@ -44,6 +52,7 @@ public class Sensor extends Node {
          else if (message.getFlag().equals("NBCHILD")) {
             if(lstEnfant.size() == 0){
                 //System.out.println(countNbChild+ "  COUNT_START ");
+                System.out.println("bib " + getID() + " " + getNeighbors().size() + " " + lstEnfant.size());
                 for (Node n : this.getNeighbors()){
                     if(n instanceof Sensor) {
                         if (((Sensor) n).parent == this) {

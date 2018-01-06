@@ -2,7 +2,7 @@ import java.util.*;
 
 public class LstTab {
     BaseStation bs;
-    Map<Integer, List<Sensor>> arbreDesProfondeur = new HashMap<>();
+    Map<Integer, List<Sensor>> arbreDesProfondeur = new TreeMap<>(Collections.reverseOrder());
     LstTab(BaseStation bs){
         this.bs = bs;
         init();

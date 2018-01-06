@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class BaseStation extends Node {
     ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
+    int nbTrueVoisin = 0;
     LstTab lstTab;
     boolean initNbChild = true;
     int cpt = 0;
@@ -15,7 +16,9 @@ public class BaseStation extends Node {
 
         // Initiates tree construction with an empty message
         sendAll(new Message(null, "INIT"));
-
+        for(Node voisin : this.getNeighbors())
+            if(voisin instanceof Sensor)
+                nbTrueVoisin++;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class BaseStation extends Node {
     @Override
     public void onClock() {
         if(initNbChild) {
-            if (lstEnfant.size() == this.getNeighbors().size()) {
+            if (lstEnfant.size() == nbTrueVoisin) {
                 System.out.println(" MESSAGE2");
                 sendAll(new Message(null, "NBCHILD"));
 
