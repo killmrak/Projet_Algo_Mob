@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class LstTab {
-    Map<Integer, List<Sensor>> arbreDesProfondeur = new TreeMap<>(Collections.reverseOrder());
+    Map<Integer, List<Sensor>> TreeOfDepth = new TreeMap<>(Collections.reverseOrder());
 
     LstTab(BaseStation bs){
 
@@ -14,24 +14,24 @@ public class LstTab {
 
     void init(BaseStation bs){
         int tmp1 = 1;
-        for (Sensor s : bs.lstEnfant)
-            tmp1 += s.profondeur;
+        for (Sensor s : bs.lstChild)
+            tmp1 += s.depth;
         initLstEnf(bs);
         System.out.println(toString());
     }
 
     void initLstEnf(BaseStation bs){
-        for (Sensor s : bs.lstEnfant)
-            this.initLstEnf(s, arbreDesProfondeur);
+        for (Sensor s : bs.lstChild)
+            this.initLstEnf(s, TreeOfDepth);
     }
 
     void  initLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre){
-        if(arbre.containsKey(s.profondeur)){
-            Set<Map.Entry<Integer, List<Sensor>>> setHm = arbreDesProfondeur.entrySet();
+        if(arbre.containsKey(s.depth)){
+            Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeOfDepth.entrySet();
             Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
             while(it.hasNext()){
                 Map.Entry<Integer, List<Sensor>> e = it.next();
-                if(e.getKey() == s.profondeur){
+                if(e.getKey() == s.depth){
                     e.getValue().add(s);
                     break;
                 }
@@ -40,17 +40,17 @@ public class LstTab {
         else{
             List<Sensor> tmp = new ArrayList<>();
             tmp.add(s);
-            arbre.put(s.profondeur, tmp);
+            arbre.put(s.depth, tmp);
         }
-        if(s.lstEnfant.size() != 0)
-            for (Sensor ss : s.lstEnfant)
+        if(s.lstChild.size() != 0)
+            for (Sensor ss : s.lstChild)
                 initLstEnf(ss, arbre);
     }
 
     public int moyenne() {
         int result = 0;
         int nb = 0;
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = arbreDesProfondeur.entrySet();
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeOfDepth.entrySet();
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while(it.hasNext()){
             Map.Entry<Integer, List<Sensor>> e = it.next();
@@ -66,7 +66,7 @@ public class LstTab {
     public String toString() {
         StringBuffer tmp = new StringBuffer();
 
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = arbreDesProfondeur.entrySet();
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeOfDepth.entrySet();
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while(it.hasNext()){
             Map.Entry<Integer, List<Sensor>> e = it.next();

@@ -12,12 +12,12 @@ public class Sensor extends Node {
     Node parent = null;
     int battery = 255;
 
-    ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
+    ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
     //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
-    int nbRetourEnfant = 0; // compteur du nombre de RETOURENFANT
-    int profondeur = 1; // Nombre de descendant totale
+    int nbReturnChild = 0; // compteur du nombre de ReturnChild
+    int depth = 1; // Nombre de descendant totale
 
-    boolean sensorMort = false;
+    boolean sensorDead = false;
 
     //boolean tousRetournementRecu = false;
     @Override
@@ -35,10 +35,10 @@ public class Sensor extends Node {
                 //sendAll(message);
                 //send(parent, new Message(null,"INIT"));
                 // Envoie du message "INIT" à tous ceux qui n'ont pas de parent, diminuer les messages en trop
-                for (Node voisins : this.getNeighbors()) {
-                    if (voisins instanceof Sensor)
-                        if (((Sensor) voisins).parent == null) {
-                            send(voisins, message);
+                for (Node neighbors : this.getNeighbors()) {
+                    if (neighbors instanceof Sensor)
+                        if (((Sensor) neighbors).parent == null) {
+                            send(neighbors, message);
                         }
                 }
                 // Le comptage des enfants pour les sensors se faire dans "NBCHILD"
@@ -46,7 +46,7 @@ public class Sensor extends Node {
                     send(parent, new Message(null, "INIT"));
             }
 
-            //lstEnfant.
+            //lstChild.
         }
         else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
@@ -54,30 +54,30 @@ public class Sensor extends Node {
         }
         // I/a -> exploration de l'arbre
         else if (message.getFlag().equals("NBCHILD")) {
-            if (lstEnfant.size() == 0) {
+            if (lstChild.size() == 0) {
                 // Compte le nombre d'enfant d'un noeud
                 for (Node n : this.getNeighbors())
                     if (n instanceof Sensor)
                         if (((Sensor) n).parent == this)
-                            lstEnfant.add((Sensor) n);
-                for (Sensor s : lstEnfant)
+                            lstChild.add((Sensor) n);
+                for (Sensor s : lstChild)
                     send(s, message);
                 // Cas d'une feuille, commence le rappatriement des informations de l'eploration
-                if (lstEnfant.size() == 0)
-                    send(parent, new Message(null, "RETOURENFANT"));
+                if (lstChild.size() == 0)
+                    send(parent, new Message(null, "ReturnChild"));
             }
 
         }
-        else if (message.getFlag().equals("RETOURENFANT")) {
+        else if (message.getFlag().equals("ReturnChild")) {
             // Vérifie que tous les enfants existant ont terminer l'exploration de leurs enfants
-            if (nbRetourEnfant != lstEnfant.size()) {
-                nbRetourEnfant++;
+            if (nbReturnChild != lstChild.size()) {
+                nbReturnChild++;
             }
-            if (nbRetourEnfant == lstEnfant.size()) {
+            if (nbReturnChild == lstChild.size()) {
                 // Calcul de la profondeur du noeurd (nombre toral d'enfant et sous enfant)
-                for (Sensor s : lstEnfant)
-                    profondeur += s.profondeur;
-                send(parent, new Message(null, "RETOURENFANT"));
+                for (Sensor s : lstChild)
+                    depth += s.depth;
+                send(parent, new Message(null, "ReturnChild"));
             }
         }
     }
@@ -91,12 +91,12 @@ public class Sensor extends Node {
             toString();
         }
         else {
-            if (!sensorMort) {
-                sensorMort = true;
+            if (!sensorDead) {
+                sensorDead = true;
                 /*
                 System.out.print("end " + getID() + " ");
                 System.out.print(nbChild + " ");
-                System.out.print(profondeur+ "\n");
+                System.out.print(depth+ "\n");
                 */
             }
         }
@@ -120,7 +120,7 @@ public class Sensor extends Node {
     public String toString() {
         StringBuffer result = new StringBuffer();
         result.append("Début : " + this.getID() + ", ");
-        for(Sensor tmp : lstEnfant){
+        for(Sensor tmp : lstChild){
             result.append(tmp.getID() + ", ");
         }
         result.append("\n");
@@ -131,18 +131,18 @@ public class Sensor extends Node {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-        result.append(profondeur);
+        result.append(depth);
         return result.toString();
     }
 /*
     // Première méthode d'exploration des enfants
     int initChild(){
         int tmp = 0;
-        if(this.lstEnfant.size() == 0){
+        if(this.lstChild.size() == 0){
             return 1;
         }
         else{
-            for (Sensor s : lstEnfant){
+            for (Sensor s : lstChild){
                 tmp += s.initChild();
             }
         }

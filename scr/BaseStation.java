@@ -4,9 +4,9 @@ import jbotsim.Node;
 import java.util.ArrayList;
 
 public class BaseStation extends Node {
-    ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
+    ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
     int nbRobot = 0;
-    int nbTrueVoisin = 0;
+    int nbTrueNeighbor = 0;
     LstTab lstTab;
     boolean initNbChild = true;
     int cpt = 0;
@@ -17,22 +17,22 @@ public class BaseStation extends Node {
 
         // Initiates tree construction with an empty message
         sendAll(new Message(null, "INIT"));
-        for(Node voisin : this.getNeighbors())
-            if(voisin instanceof Sensor)
-                nbTrueVoisin++;
+        for(Node neighbor : this.getNeighbors())
+            if(neighbor instanceof Sensor)
+                nbTrueNeighbor++;
     }
 
     @Override
     public void onMessage(Message message) {
         if (message.getFlag().equals("INIT")) {
             // retransmit up the tree
-            lstEnfant.add((Sensor) message.getSender());
+            lstChild.add((Sensor) message.getSender());
             System.out.println(((Sensor) message.getSender()).getID() + " MESSAGE");
         }
-        else if (message.getFlag().equals("RETOURENFANT")) {
+        else if (message.getFlag().equals("RETURNCHILD")) {
             System.out.println("Base " + this.getID() + " " +  message.getSender().getID());
             cpt++;
-            if(cpt == lstEnfant.size());
+            if(cpt == lstChild.size());
                 //lstTab = new LstTab(this);
         }
     }
@@ -40,7 +40,7 @@ public class BaseStation extends Node {
     @Override
     public void onClock() {
         if(initNbChild) {
-            if (lstEnfant.size() == nbTrueVoisin) {
+            if (lstChild.size() == nbTrueNeighbor) {
                 System.out.println(" MESSAGE2");
                 sendAll(new Message(null, "NBCHILD"));
 
@@ -53,8 +53,8 @@ public class BaseStation extends Node {
         }
     }
 
-    public int ajoutNumRobot(){
-        System.out.println("BASE AJOUT ");
+    public int AddNumRobot(){
+        System.out.println("ADD BASE ");
         return ++nbRobot;
     }
 
@@ -78,7 +78,7 @@ public class BaseStation extends Node {
         }
 */
         tmp.append("1" + this.getNeighbors().size());
-        tmp.append(" 2 " + lstEnfant.size());
+        tmp.append(" 2 " + lstChild.size());
         return tmp.toString();
     }
 

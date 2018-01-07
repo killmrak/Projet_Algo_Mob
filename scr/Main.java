@@ -4,6 +4,7 @@ import jbotsim.Topology;
 import jbotsim.ui.JViewer;
 
 public class Main {
+
     public static void main(String[] args) {
         // Create topology with clock not started
         Topology tp = new Topology(false);
@@ -22,16 +23,17 @@ public class Main {
 
         // Add sensors
         tp.setDefaultNodeModel(Sensor.class);
-        tp.fromFile("/net/cremi/atruong/sensors.tp"); // to be adapted
+        tp.fromFile(".\\scr\\topology\\sensors.tp"); // to be adapted
 
         // Add base station
         tp.addNode(100, 80, new BaseStation());
-
         // Add two robots
-        tp.addNode(90, 40, new Robot());
-        tp.addNode(60, 80, new Robot());
+        //tp.addNode(90, 40, new Robot());
+       // tp.addNode(60, 80, new Robot());
+        System.out.println(tp.getNodes().get(1).getX());
 
         new JViewer(tp);
         tp.start(); // starts the clock
+
     }
 }
