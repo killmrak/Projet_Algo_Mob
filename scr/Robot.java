@@ -4,11 +4,14 @@ import java.awt.geom.Point2D;
 import java.util.*;
 
 public class Robot extends WaypointNode {
+    // Liste de tous les capteurs du réseaux classé par nombre de fils (profondeur)
     LstTab lstNodeBaseStation = null;
+    // Liste des capteurs dont le robots aura la charge
     LstTab TreeSensor = new LstTab();
-    int numRobot = 0;
-    int nbRobot = 0;
+    int numRobot = 0; // Numéro du robot
+    int nbRobot = 0; // Nombre de robots totales en services
 
+    BaseStation base = null;
     @Override
     public void onStart() {
         setIcon("/images/robot.png"); // to be adapted
@@ -22,8 +25,12 @@ public class Robot extends WaypointNode {
             ((Sensor) node).battery = 255;
         else if (node instanceof BaseStation) {
             this.lstNodeBaseStation = new LstTab((BaseStation) node);
-            if(numRobot == 0)
+            if(numRobot == 0) {
+                // 1er contact avec la base, rècupère certaines informations
                 numRobot = ((BaseStation) node).AddNumRobot();
+                base = ((BaseStation) node);
+            }
+            // Actualise le nombre totale de robots en service
             nbRobot = ((BaseStation) node).getNbRobot();
         }
         else if (node instanceof Robot) {
@@ -44,49 +51,69 @@ public class Robot extends WaypointNode {
      * Méthode qui permet d'obtenir une liste de capteur apdater pour chaque robot
      */
     public void update0(){
-        int moy = lstNodeBaseStation.moyenne();
         int cpt =0;
 
         Point2D tmp1 = (Point2D) this.getLocation().clone();
-        System.out.println("Average : " + moy);
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = lstNodeBaseStation.TreeOfDepth.entrySet();
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = lstNodeBaseStation.treeOfDepth.entrySet();
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, List<Sensor>> e = it.next();
-
-            if (test(e.getKey().intValue(), moy, cpt)) {
-                for (int i = 0; i < e.getValue().size(); i++) {
-                    //Point2D tmp2 = e.getValue().get(i).getLocation();
-                    //tmp1 = ameliorerDestination(tmp1, tmp2);
-                    TreeSensor.addLstEnf(e.getValue().get(i), TreeSensor.TreeOfDepth, false);
-                }
-                System.out.println("CPT : " + cpt + " : " + e.getKey().intValue() + " : " + numRobot);
-            }
+            if (checkIntervalSenssor(e.getKey().intValue(), lstNodeBaseStation.moyenne(),
+                    cpt, lstNodeBaseStation.treeOfDepth.size()))
+                for (int i = 0; i < e.getValue().size(); i++)
+                    TreeSensor.addLstEnf(e.getValue().get(i), TreeSensor.treeOfDepth, false);
             cpt++;
         }
+        updateDes();
     }
 
-    public boolean test(int key, double average, int cpt){
-        if(nbRobot == 1){
-            if (key > average)
+    /**
+     * Fonction qui permet de choisir l'intervalle d'action du robot par rapport à la profondeure
+     * des capteurs (Possède une limite sur le nombre de robots)
+     * Voici les différents cas
+     *      - Robot numéro 1 :
+     *          - Si il est seule, il parcoure tout
+     *          - Si il y a 2 robots, il parcoure les capteurs ont la profondeur est supérieure
+     *              à la moyenne de l'arbre
+     *          - Si il y a plus de 2 robots, il parcoure les 3 plus grosses profondeur (arbitaire)
+     *      - Robot numéro 2 :
+     *          - Si il y a 2 robots, il parcoure les capteurs ont la profondeur est inférieure
+     *      - Autre cas :
+     *          - Chaque robot parcours une zone donnée par cette formule dans le cas ou cpt > 2
+     *              (cpt >= (numRobot * 2) - 1 && cpt <= (numRobot *  ((double) nbIndice / nbRobot)) + 1
+     * @param key : Profondeur du capteur (nombre de fils/petits fils)
+     * @param average : Moyenne de l'arbre de capteur
+     * @param cpt : Numéro d'indice de la clé dans la Map
+     * @param nbIndice : Nombre de clé dans la Map
+     * @return
+     */
+    public boolean checkIntervalSenssor(int key, double average, int cpt, int nbIndice){
+        //int roundNbIndiceNbRobot = Math.round(nbIndice / nbRobot);
+        //System.out.println("Count indice : " +  ((double) nbIndice / nbRobot));
+        if(numRobot == 1){
+            if (nbRobot == 1)
                 return true;
-            else
-                return false;
+            else if (nbRobot == 2) {
+                if (key > average) return true;
+                else return false;
+            }
+            else{
+                if(cpt < 3) return true;
+                else return false;
+            }
         }
         else {
-            if (numRobot == 1)
-                if (key > average)
-                    return true;
-                else
-                    return false;
-            else
-            if (key <= average)
-                return true;
-            else
+            if(nbRobot == 2){
+                if (key <= average) return true;
+                else return false;
+            }
+            else {
+                if(cpt > 2)
+                    if (cpt >= (numRobot * 2) - 1 &&
+                            cpt <= (numRobot *  ((double) nbIndice / nbRobot)) + 1) return true;
                 return false;
+            }
         }
-
-
     }
 
     /**
@@ -96,7 +123,7 @@ public class Robot extends WaypointNode {
         int moy = lstNodeBaseStation.moyenne();
         Point2D tmp1 = (Point2D) this.getLocation().clone();
         System.out.println("Average : " + moy);
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeSensor.TreeOfDepth.entrySet();
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeSensor.treeOfDepth.entrySet();
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, List<Sensor>> e = it.next();
@@ -129,16 +156,15 @@ public class Robot extends WaypointNode {
 
     @Override
     public void onArrival() {
-        System.out.println("Num : " + numRobot + " nb : " + nbRobot);
-        System.out.println("CALCUL : " + 8/3);
-        System.out.println("Taille pile : " + destinations.size());
-        if (destinations.isEmpty() && lstNodeBaseStation != null) {
+        if (destinations.isEmpty() && lstNodeBaseStation != null)
             update0();
-            updateDes();
-        }
         if (destinations.size() != 0)
             destinations.peek();
-        else
+        else {
             addDestination(100, 80);
+            addDestination(Math.random() * 300, Math.random() * 200);
+            addDestination(100, 80);
+        }
+
     }
 }
