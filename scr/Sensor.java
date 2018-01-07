@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Sensor extends Node {
-    public static double TEMPS_ENVOI = 0.02;
     Node parent = null;
     int battery = 255;
 
@@ -16,10 +15,8 @@ public class Sensor extends Node {
     //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
     int nbReturnChild = 0; // compteur du nombre de ReturnChild
     int depth = 1; // Nombre de descendant totale
-
     boolean sensorDead = false;
 
-    //boolean tousRetournementRecu = false;
     @Override
     public void onMessage(Message message) {
         // "INIT" flag : construction of the spanning tree
@@ -31,24 +28,17 @@ public class Sensor extends Node {
                 // enter the tree
                 parent = message.getSender();
                 getCommonLinkWith(parent).setWidth(4);
-                // propagate further
-                //sendAll(message);
-                //send(parent, new Message(null,"INIT"));
                 // Envoie du message "INIT" à tous ceux qui n'ont pas de parent, diminuer les messages en trop
                 for (Node neighbors : this.getNeighbors()) {
                     if (neighbors instanceof Sensor)
-                        if (((Sensor) neighbors).parent == null) {
+                        if (((Sensor) neighbors).parent == null)
                             send(neighbors, message);
-                        }
                 }
                 // Le comptage des enfants pour les sensors se faire dans "NBCHILD"
                 if (parent instanceof BaseStation)
                     send(parent, new Message(null, "INIT"));
             }
-
-            //lstChild.
-        }
-        else if (message.getFlag().equals("SENSING")) {
+        } else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
             send(parent, message);
         }
@@ -67,12 +57,10 @@ public class Sensor extends Node {
                     send(parent, new Message(null, "ReturnChild"));
             }
 
-        }
-        else if (message.getFlag().equals("ReturnChild")) {
+        } else if (message.getFlag().equals("ReturnChild")) {
             // Vérifie que tous les enfants existant ont terminer l'exploration de leurs enfants
-            if (nbReturnChild != lstChild.size()) {
+            if (nbReturnChild != lstChild.size())
                 nbReturnChild++;
-            }
             if (nbReturnChild == lstChild.size()) {
                 // Calcul de la profondeur du noeurd (nombre toral d'enfant et sous enfant)
                 for (Sensor s : lstChild)
@@ -89,8 +77,7 @@ public class Sensor extends Node {
             battery--;
             updateColor();
             toString();
-        }
-        else {
+        } else {
             if (!sensorDead) {
                 sensorDead = true;
                 /*
@@ -105,7 +92,7 @@ public class Sensor extends Node {
     @Override
     public void onClock() {
         if (parent != null) { // if already in the tree
-            if (Math.random() < TEMPS_ENVOI) { // from time to time...
+            if (Math.random() < 0.02) { // from time to time...
                 double sensedValue = Math.random(); // sense a value
                 send(parent, new Message(sensedValue, "SENSING")); // send it to parent
             }
@@ -115,18 +102,6 @@ public class Sensor extends Node {
     protected void updateColor() {
         setColor(battery == 0 ? Color.red : new Color(255 - battery, 255 - battery, 255));
     }
-    /*
-    @Override
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append("Début : " + this.getID() + ", ");
-        for(Sensor tmp : lstChild){
-            result.append(tmp.getID() + ", ");
-        }
-        result.append("\n");
-        return result.toString();
-    }
-    */
 
     @Override
     public String toString() {
