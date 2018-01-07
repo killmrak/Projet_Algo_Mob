@@ -36,9 +36,13 @@ public class Robot extends WaypointNode {
     public void onSensingOut(Node node) {
         if (node instanceof BaseStation) {
             this.lstNodeBaseStation = new LstTab((BaseStation) node);
+            nbRobot = ((BaseStation) node).getNbRobot();
         }
     }
 
+    /**
+     * Méthode qui permet d'obtenir une liste de capteur apdater pour chaque robot
+     */
     public void update0(){
         int moy = lstNodeBaseStation.moyenne();
         int cpt =0;
@@ -49,12 +53,14 @@ public class Robot extends WaypointNode {
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, List<Sensor>> e = it.next();
+
             if (test(e.getKey().intValue(), moy, cpt)) {
                 for (int i = 0; i < e.getValue().size(); i++) {
                     //Point2D tmp2 = e.getValue().get(i).getLocation();
                     //tmp1 = ameliorerDestination(tmp1, tmp2);
-                    TreeSensor.initLstEnf(e.getValue().get(i), TreeSensor.TreeOfDepth);
+                    TreeSensor.addLstEnf(e.getValue().get(i), TreeSensor.TreeOfDepth, false);
                 }
+                System.out.println("CPT : " + cpt + " : " + e.getKey().intValue() + " : " + numRobot);
             }
             cpt++;
         }
@@ -74,7 +80,7 @@ public class Robot extends WaypointNode {
                 else
                     return false;
             else
-            if (key < average)
+            if (key <= average)
                 return true;
             else
                 return false;
@@ -83,6 +89,9 @@ public class Robot extends WaypointNode {
 
     }
 
+    /**
+     * Méthode qui permet redonner une liste de cpateur à visiter
+     */
     public void updateDes(){
         int moy = lstNodeBaseStation.moyenne();
         Point2D tmp1 = (Point2D) this.getLocation().clone();
@@ -91,47 +100,22 @@ public class Robot extends WaypointNode {
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, List<Sensor>> e = it.next();
-
-            //if (e.getKey().intValue() < moy) {
-
                 for (int i = 0; i < e.getValue().size(); i++) {
                     Point2D tmp2 = e.getValue().get(i).getLocation();
                     tmp1 = ImproveDestination(tmp1, tmp2);
                     addDestination(tmp1.getX(), tmp1.getY());
                 }
-            //}
         }
     }
 
-    /*
-    public void updateDes() {
-        int moy = lstNodeBaseStation.moyenne();
-        Point2D tmp1 = (Point2D) this.getLocation().clone();
-        System.out.println("Moyenne : " + moy);
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = lstNodeBaseStation.TreeOfDepth.entrySet();
-        Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
-        while (it.hasNext()) {
-            Map.Entry<Integer, List<Sensor>> e = it.next();
-
-            if (e.getKey().intValue() < moy) {
-
-                System.out.println("Key : " + e.getKey() + " soze : " + e.getValue().size());
-                for (int i = 0; i < e.getValue().size(); i++) {
-                    Point2D tmp2 = e.getValue().get(i).getLocation();
-                    System.out.print("Base 0 : " + tmp1.toString() + tmp2.toString());
-                    System.out.println(" Distance : " + tmp1.distance(tmp2));
-
-                    tmp1 = ameliorerDestination(tmp1, tmp2);
-                    System.out.print("Base 1 : " + tmp1.toString() + tmp2.toString());
-                    System.out.println(" Distance : " + tmp1.distance(tmp2));
-
-                    addDestination(tmp1.getX(), tmp2.getY());
-                }
-            }
-        }
-    }
-    */
-
+    /**
+     * Fonction qui permet d'obtenir un "meilleur" point de destination par rapport
+     * à la portée du robot
+     * Algorithme : approche par le milieu succesive
+     * @param pointBase : Point à partir duquelle le robot part pour rejoidre le point suivant
+     * @param pointDestination : Nouvelle destination du robot
+     * @return : Nouveau points calculer
+     */
     Point2D ImproveDestination(Point2D pointBase, Point2D pointDestination) {
         Point2D tmp1 = (Point2D) pointBase.clone();
         Point2D tmp2 = (Point2D) pointDestination.clone();

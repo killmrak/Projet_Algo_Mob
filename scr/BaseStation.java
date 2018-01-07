@@ -53,11 +53,19 @@ public class BaseStation extends Node {
         }
     }
 
+    /**
+     * Fonction qui permet de compter le nombre de robots en circulation
+     * @return : Le numéro/identifiant du robot
+     */
     public int AddNumRobot(){
         System.out.println("ADD BASE ");
         return ++nbRobot;
     }
 
+    /**
+     * Fonction qui permet de donner le nombre de robots trouver
+     * @return : Renvoie le nombre de robots
+     */
     public int getNbRobot(){
         return nbRobot;
     }
@@ -66,7 +74,6 @@ public class BaseStation extends Node {
         if (node instanceof Robot) {
             ((Robot)node).lstNodeBaseStation = new LstTab(this);
         }
-
     }
 
     @Override

@@ -4,28 +4,31 @@ public class LstTab {
     Map<Integer, List<Sensor>> TreeOfDepth = new TreeMap<>(Collections.reverseOrder());
 
     LstTab(BaseStation bs){
-
-        init(bs);
+        addLstEnf(bs);
     }
 
     LstTab(){
 
     }
 
-    void init(BaseStation bs){
-        int tmp1 = 1;
+    /**
+     * Méthode qui permet de lancer de manière recursive l'ajout de l'arbre
+     * des profondeurs.
+     * @param bs : Objet de type BaseStation
+     */
+    void addLstEnf(BaseStation bs){
         for (Sensor s : bs.lstChild)
-            tmp1 += s.depth;
-        initLstEnf(bs);
+            this.addLstEnf(s, TreeOfDepth, true);
         System.out.println(toString());
     }
 
-    void initLstEnf(BaseStation bs){
-        for (Sensor s : bs.lstChild)
-            this.initLstEnf(s, TreeOfDepth);
-    }
-
-    void  initLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre){
+    /**
+     * Méthode qui permet d'ajouter un sensor dans un LstTab
+     * @param s : Objet de type BaseStation
+     * @param arbre : Map d'entier Sensor et Liste de Sensor
+     * @param recusive : Option qui permet d'appeler la méthoe de façon récursive
+     */
+    void addLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre, boolean recusive){
         if(arbre.containsKey(s.depth)){
             Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeOfDepth.entrySet();
             Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
@@ -42,11 +45,17 @@ public class LstTab {
             tmp.add(s);
             arbre.put(s.depth, tmp);
         }
-        if(s.lstChild.size() != 0)
-            for (Sensor ss : s.lstChild)
-                initLstEnf(ss, arbre);
+        if (recusive) {
+            if (s.lstChild.size() != 0)
+                for (Sensor ss : s.lstChild)
+                    addLstEnf(ss, arbre, true);
+        }
     }
 
+    /**
+     * Fonction qui permet d'obtenir la moyenne d'au arbre
+     * @return : La moyenne de l'arbre
+     */
     public int moyenne() {
         int result = 0;
         int nb = 0;
