@@ -8,16 +8,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Sensor extends Node {
-    public static double TEMPS_ENVOI = 2;
+    public static double TEMPS_ENVOI = 0.02;
     Node parent = null;
     int battery = 255;
 
     ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
-  //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
+    //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
     int nbRetourEnfant = 0; // compteur du nombre de RETOURENFANT
     int profondeur = 1; // Nombre de descendant totale
 
     boolean sensorMort = false;
+
     //boolean tousRetournementRecu = false;
     @Override
     public void onMessage(Message message) {
@@ -33,59 +34,50 @@ public class Sensor extends Node {
                 // propagate further
                 //sendAll(message);
                 //send(parent, new Message(null,"INIT"));
+                // Envoie du message "INIT" à tous ceux qui n'ont pas de parent, diminuer les messages en trop
                 for (Node voisins : this.getNeighbors()) {
                     if (voisins instanceof Sensor)
                         if (((Sensor) voisins).parent == null) {
                             send(voisins, message);
                         }
                 }
-                if(parent instanceof BaseStation)
-                    send(parent, new Message(null,"INIT"));
+                // Le comptage des enfants pour les sensors se faire dans "NBCHILD"
+                if (parent instanceof BaseStation)
+                    send(parent, new Message(null, "INIT"));
             }
 
             //lstEnfant.
-        } else if (message.getFlag().equals("SENSING")) {
+        }
+        else if (message.getFlag().equals("SENSING")) {
             // retransmit up the tree
             send(parent, message);
         }
         // I/a -> exploration de l'arbre
-         else if (message.getFlag().equals("NBCHILD")) {
-            if(lstEnfant.size() == 0){
-                //System.out.println(countNbChild+ "  COUNT_START ");
-                System.out.println("bib " + getID() + " " + getNeighbors().size() + " " + lstEnfant.size());
-                for (Node n : this.getNeighbors()){
-                    if(n instanceof Sensor) {
-                        if (((Sensor) n).parent == this) {
+        else if (message.getFlag().equals("NBCHILD")) {
+            if (lstEnfant.size() == 0) {
+                // Compte le nombre d'enfant d'un noeud
+                for (Node n : this.getNeighbors())
+                    if (n instanceof Sensor)
+                        if (((Sensor) n).parent == this)
                             lstEnfant.add((Sensor) n);
-                            //System.out.println(getID() + " " + ((Sensor) n).getID() + " " +lstEnfant.size());
-                            //System.out.println("SIZE, nbchild" + ((Sensor) n).lstEnfant.size());
-                        }
-                    }
-                }
-
-                for(Sensor s : lstEnfant){
+                for (Sensor s : lstEnfant)
                     send(s, message);
-                }
-
-                if(lstEnfant.size() == 0){
+                // Cas d'une feuille, commence le rappatriement des informations de l'eploration
+                if (lstEnfant.size() == 0)
                     send(parent, new Message(null, "RETOURENFANT"));
-                }
             }
 
         }
         else if (message.getFlag().equals("RETOURENFANT")) {
-            //System.out.println("dedans/n");
-
-            if(nbRetourEnfant != lstEnfant.size()){
+            // Vérifie que tous les enfants existant ont terminer l'exploration de leurs enfants
+            if (nbRetourEnfant != lstEnfant.size()) {
                 nbRetourEnfant++;
             }
-            System.out.println( this.getID() + " " +  message.getSender().getID() + " " + this.lstEnfant.size() + " " + nbRetourEnfant);
-             if (nbRetourEnfant == lstEnfant.size()){// && !tousRetournementRecu){
-                //System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh ");
+            if (nbRetourEnfant == lstEnfant.size()) {
+                // Calcul de la profondeur du noeurd (nombre toral d'enfant et sous enfant)
                 for (Sensor s : lstEnfant)
                     profondeur += s.profondeur;
                 send(parent, new Message(null, "RETOURENFANT"));
-                //tousRetournementRecu = true;
             }
         }
     }
@@ -98,8 +90,8 @@ public class Sensor extends Node {
             updateColor();
             toString();
         }
-        else{
-            if (!sensorMort){
+        else {
+            if (!sensorMort) {
                 sensorMort = true;
                 /*
                 System.out.print("end " + getID() + " ");
@@ -142,7 +134,8 @@ public class Sensor extends Node {
         result.append(profondeur);
         return result.toString();
     }
-
+/*
+    // Première méthode d'exploration des enfants
     int initChild(){
         int tmp = 0;
         if(this.lstEnfant.size() == 0){
@@ -155,4 +148,5 @@ public class Sensor extends Node {
         }
         return tmp +1;
     }
+    */
 }

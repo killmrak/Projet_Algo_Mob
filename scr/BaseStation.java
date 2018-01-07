@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class BaseStation extends Node {
     ArrayList<Sensor> lstEnfant = new ArrayList<Sensor>();
+    int nbRobot = 0;
     int nbTrueVoisin = 0;
     LstTab lstTab;
     boolean initNbChild = true;
@@ -31,8 +32,8 @@ public class BaseStation extends Node {
         else if (message.getFlag().equals("RETOURENFANT")) {
             System.out.println("Base " + this.getID() + " " +  message.getSender().getID());
             cpt++;
-            if(cpt == lstEnfant.size())
-                lstTab = new LstTab(this);
+            if(cpt == lstEnfant.size());
+                //lstTab = new LstTab(this);
         }
     }
 
@@ -52,6 +53,22 @@ public class BaseStation extends Node {
         }
     }
 
+    public int ajoutNumRobot(){
+        System.out.println("BASE AJOUT ");
+        return ++nbRobot;
+    }
+
+    public int getNbRobot(){
+        return nbRobot;
+    }
+
+    public void onSensingIn(Node node) {
+        if (node instanceof Robot) {
+            ((Robot)node).lstNodeBaseStation = new LstTab(this);
+        }
+
+    }
+
     @Override
     public String toString() {
         StringBuffer tmp = new StringBuffer();
@@ -64,4 +81,5 @@ public class BaseStation extends Node {
         tmp.append(" 2 " + lstEnfant.size());
         return tmp.toString();
     }
+
 }
