@@ -4,11 +4,11 @@ import jbotsim.Node;
 import java.util.ArrayList;
 
 public class BaseStation extends Node {
-    ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
-    int nbRobot = 0; // Nombre de robots en circulation
-    int nbTrueNeighbor = 0; // Ne compte pas les robots
-    boolean initNbChild = true; // Permet de ne faire qu'un passage dans "NBCHILD"
-    int cpt = 0; // Compteur
+    private ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
+    private int nbRobot = 0; // Nombre de robots en circulation
+    private int nbTrueNeighbor = 0; // Ne compte pas les robots
+    private boolean initNbChild = true; // Permet de ne faire qu'un passage dans "NBCHILD"
+    private int cpt = 0; // Compteur
 
     @Override
     public void onStart() {
@@ -37,7 +37,6 @@ public class BaseStation extends Node {
     public void onClock() {
         if (initNbChild) {
             if (lstChild.size() == nbTrueNeighbor) {
-                System.out.println(" MESSAGE2");
                 sendAll(new Message(null, "NBCHILD"));
                 initNbChild = false;
             }
@@ -51,7 +50,6 @@ public class BaseStation extends Node {
      * @return : Le numéro/identifiant du robot
      */
     public int AddNumRobot() {
-        System.out.println("ADD BASE ");
         return ++nbRobot;
     }
 
@@ -64,9 +62,19 @@ public class BaseStation extends Node {
         return nbRobot;
     }
 
+    /**
+     * Fonction qui retourne la liste des enfants
+     *
+     * @return : Liste des Sensors
+     */
+    public ArrayList<Sensor> getLstChild() {
+        return lstChild;
+    }
+
+    @Override
     public void onSensingIn(Node node) {
         if (node instanceof Robot)
-            ((Robot) node).lstNodeBaseStation = new LstTab(this);
+            ((Robot) node).setLstNodeBaseStation(new LstTab(this));
     }
 
     @Override

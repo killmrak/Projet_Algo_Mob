@@ -5,13 +5,11 @@ import java.util.*;
 
 public class Robot extends WaypointNode {
     // Liste de tous les capteurs du réseaux classé par nombre de fils (profondeur)
-    LstTab lstNodeBaseStation = null;
+    private LstTab lstNodeBaseStation = null;
     // Liste des capteurs dont le robots aura la charge
-    LstTab TreeSensor = new LstTab();
-    int numRobot = 0; // Numéro du robot
-    int nbRobot = 0; // Nombre de robots totales en services
-
-    BaseStation base = null;
+    private LstTab treeSensor = new LstTab();
+    private int numRobot = 0; // Numéro du robot
+    private int nbRobot = 0; // Nombre de robots totales en services
 
     @Override
     public void onStart() {
@@ -29,7 +27,6 @@ public class Robot extends WaypointNode {
             if (numRobot == 0) {
                 // 1er contact avec la base, rècupère certaines informations
                 numRobot = ((BaseStation) node).AddNumRobot();
-                base = ((BaseStation) node);
             }
             // Actualise le nombre totale de robots en service
             nbRobot = ((BaseStation) node).getNbRobot();
@@ -49,17 +46,16 @@ public class Robot extends WaypointNode {
     /**
      * Méthode qui permet d'obtenir une liste de capteur apdater pour chaque robot
      */
-    public void update0() {
+    private void update0() {
         int cpt = 0;
-        Point2D tmp1 = (Point2D) this.getLocation().clone();
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = lstNodeBaseStation.treeOfDepth.entrySet();
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = lstNodeBaseStation.getTreeOfDepth().entrySet();
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, List<Sensor>> e = it.next();
             if (checkIntervalSenssor(e.getKey().intValue(), lstNodeBaseStation.moyenne(),
-                    cpt, lstNodeBaseStation.treeOfDepth.size()))
+                    cpt, lstNodeBaseStation.getTreeOfDepth().size()))
                 for (int i = 0; i < e.getValue().size(); i++)
-                    TreeSensor.addLstEnf(e.getValue().get(i), TreeSensor.treeOfDepth, false);
+                    treeSensor.addLstEnf(e.getValue().get(i), treeSensor.getTreeOfDepth(), false);
             cpt++;
         }
         updateDes();
@@ -84,38 +80,31 @@ public class Robot extends WaypointNode {
      * @param average  : Moyenne de l'arbre de capteur
      * @param cpt      : Numéro d'indice de la clé dans la Map
      * @param nbIndice : Nombre de clé dans la Map
-     * @return
+     * @return : true si la key appartient à l'intervalle d'action du robot
      */
-    public boolean checkIntervalSenssor(int key, double average, int cpt, int nbIndice) {
+    private boolean checkIntervalSenssor(int key, double average, int cpt, int nbIndice) {
         if (numRobot == 1) {
             if (nbRobot == 1)
                 return true;
             else if (nbRobot == 2)
-                if (key > average) return true;
-                else return false;
-            else if (cpt < 3) return true;
-            else return false;
+                return key > average;
+            return (cpt < 4);
         } else {
             if (nbRobot == 2)
-                if (key <= average) return true;
-                else return false;
-            else {
-                if (cpt > 2)
-                    if (cpt >= (numRobot * 2) - 1 &&
-                            cpt <= (numRobot * ((double) nbIndice / nbRobot)) + 1) return true;
-                return false;
-            }
+                return key <= average;
+            else
+                return (cpt > 2 && cpt >= (numRobot * 2) - 1 &&
+                        cpt <= (numRobot * ((double) nbIndice / nbRobot)) + 1);
         }
     }
 
     /**
      * Méthode qui permet redonner une liste de cpateur à visiter
      */
-    public void updateDes() {
-        int moy = lstNodeBaseStation.moyenne();
+    private void updateDes() {
+        int cpt = 0;
         Point2D tmp1 = (Point2D) this.getLocation().clone();
-        System.out.println("Average : " + moy);
-        Set<Map.Entry<Integer, List<Sensor>>> setHm = TreeSensor.treeOfDepth.entrySet();
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = treeSensor.getTreeOfDepth().entrySet();
         Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, List<Sensor>> e = it.next();
@@ -123,6 +112,32 @@ public class Robot extends WaypointNode {
                 Point2D tmp2 = e.getValue().get(i).getLocation();
                 tmp1 = ImproveDestination(tmp1, tmp2);
                 addDestination(tmp1.getX(), tmp1.getY());
+            }
+            if (nbRobot == 2) {
+                if (numRobot == 1 && cpt == (treeSensor.getTreeOfDepth().size() / 2) + 1)
+                    strate();
+                else if (numRobot == 2 && cpt == (treeSensor.getTreeOfDepth().size() / 2))
+                    strate();
+            }
+            cpt++;
+        }
+    }
+
+    private void strate() {
+        int moitier = treeSensor.getTreeOfDepth().size() / 2;
+        Point2D tmp1 = getLocation();
+        int cpt = 0;
+        Set<Map.Entry<Integer, List<Sensor>>> setHm = treeSensor.getTreeOfDepth().entrySet();
+        Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, List<Sensor>> e = it.next();
+            if (cpt < moitier) {
+                for (int i = 0; i < e.getValue().size(); i++) {
+                    Point2D tmp2 = e.getValue().get(i).getLocation();
+                    tmp1 = ImproveDestination(tmp1, tmp2);
+                    addDestination(tmp1.getX(), tmp1.getY());
+                }
+                cpt++;
             }
         }
     }
@@ -136,7 +151,7 @@ public class Robot extends WaypointNode {
      * @param pointDestination : Nouvelle destination du robot
      * @return : Nouveau points calculer
      */
-    Point2D ImproveDestination(Point2D pointBase, Point2D pointDestination) {
+    private Point2D ImproveDestination(Point2D pointBase, Point2D pointDestination) {
         Point2D tmp1 = (Point2D) pointBase.clone();
         Point2D tmp2 = (Point2D) pointDestination.clone();
         while (tmp1.distance(tmp2) > getSensingRange()) {
@@ -159,5 +174,9 @@ public class Robot extends WaypointNode {
             addDestination(100, 80);
         }
 
+    }
+
+    public void setLstNodeBaseStation(LstTab lstNodeBaseStation) {
+        this.lstNodeBaseStation = lstNodeBaseStation;
     }
 }

@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class LstTab {
-    Map<Integer, List<Sensor>> treeOfDepth = new TreeMap<>(Collections.reverseOrder());
+    private Map<Integer, List<Sensor>> treeOfDepth = new TreeMap<>(Collections.reverseOrder());
 
     LstTab(BaseStation bs) {
         addLstEnf(bs);
@@ -12,13 +12,22 @@ public class LstTab {
     }
 
     /**
+     * Getter de la Map
+     *
+     * @return : La Map
+     */
+    public Map<Integer, List<Sensor>> getTreeOfDepth() {
+        return treeOfDepth;
+    }
+
+    /**
      * Méthode qui permet de lancer de manière recursive l'ajout de l'arbre
      * des profondeurs.
      *
      * @param bs : Objet de type BaseStation
      */
-    void addLstEnf(BaseStation bs) {
-        for (Sensor s : bs.lstChild)
+    private void addLstEnf(BaseStation bs) {
+        for (Sensor s : bs.getLstChild())
             this.addLstEnf(s, treeOfDepth, true);
     }
 
@@ -29,13 +38,13 @@ public class LstTab {
      * @param arbre    : Map d'entier Sensor et Liste de Sensor
      * @param recusive : Option qui permet d'appeler la méthoe de façon récursive
      */
-    void addLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre, boolean recusive) {
-        if (arbre.containsKey(s.depth)) {
+    public void addLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre, boolean recusive) {
+        if (arbre.containsKey(s.getDepth())) {
             Set<Map.Entry<Integer, List<Sensor>>> setHm = treeOfDepth.entrySet();
             Iterator<Map.Entry<Integer, List<Sensor>>> it = setHm.iterator();
             while (it.hasNext()) {
                 Map.Entry<Integer, List<Sensor>> e = it.next();
-                if (e.getKey() == s.depth)
+                if (e.getKey() == s.getDepth())
                     if (!e.getValue().contains((Sensor) s)) {
                         e.getValue().add(s);
                         break;
@@ -44,11 +53,11 @@ public class LstTab {
         } else {
             List<Sensor> tmp = new ArrayList<>();
             tmp.add(s);
-            arbre.put(s.depth, tmp);
+            arbre.put(s.getDepth(), tmp);
         }
         if (recusive)
-            if (s.lstChild.size() != 0)
-                for (Sensor ss : s.lstChild)
+            if (s.getLstChild().size() != 0)
+                for (Sensor ss : s.getLstChild())
                     addLstEnf(ss, arbre, true);
     }
 
@@ -72,6 +81,11 @@ public class LstTab {
         return result / nb + 1;
     }
 
+    /**
+     * Fonction qui retourne le contenu de la Map
+     *
+     * @return : le contenu de la Map sous forme de string
+     */
     @Override
     public String toString() {
         StringBuffer tmp = new StringBuffer();

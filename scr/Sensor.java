@@ -1,21 +1,34 @@
 import jbotsim.Message;
 import jbotsim.Node;
-import org.jcp.xml.dsig.internal.SignerOutputStream;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Sensor extends Node {
-    Node parent = null;
+    private Node parent = null;
     int battery = 255;
 
-    ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
-    //  ArrayList<Integer> nbChild = new ArrayList<Integer>();
-    int nbReturnChild = 0; // compteur du nombre de ReturnChild
-    int depth = 1; // Nombre de descendant totale
-    boolean sensorDead = false;
+    private ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
+    private int nbReturnChild = 0; // compteur du nombre de ReturnChild
+    private int depth = 1; // Nombre de descendant totale
+
+    /**
+     * Getter getDepth
+     *
+     * @return : la profondeur du Sensor
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
+     * Getter de lstChild
+     *
+     * @return : La liste des enfants du Sensor
+     */
+    public ArrayList<Sensor> getLstChild() {
+        return lstChild;
+    }
 
     @Override
     public void onMessage(Message message) {
@@ -76,16 +89,8 @@ public class Sensor extends Node {
             super.send(destination, message);
             battery--;
             updateColor();
-            toString();
         } else {
-            if (!sensorDead) {
-                sensorDead = true;
-                /*
-                System.out.print("end " + getID() + " ");
-                System.out.print(nbChild + " ");
-                System.out.print(depth+ "\n");
-                */
-            }
+            System.out.print("end " + getID() + " ");
         }
     }
 
