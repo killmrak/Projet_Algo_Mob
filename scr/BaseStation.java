@@ -28,7 +28,7 @@ public class BaseStation extends Node {
             // retransmit up the tree
             lstChild.add((Sensor) message.getSender());
         } else if (message.getFlag().equals("RETURNCHILD")) {
-            System.out.println("Base " + this.getID() + " " + message.getSender().getID());
+            // Retour de la collecte des profondeurs des enfants
             cpt++;
         }
     }

@@ -21,7 +21,7 @@ public class LstTab {
     }
 
     /**
-     * Méthode qui permet de lancer de manière recursive l'ajout de l'arbre
+     * Méthode qui permet de lancer de manière récursive l'ajout de l'arbre
      * des profondeurs.
      *
      * @param bs : Objet de type BaseStation
@@ -36,7 +36,7 @@ public class LstTab {
      *
      * @param s        : Objet de type BaseStation
      * @param arbre    : Map d'entier Sensor et Liste de Sensor
-     * @param recusive : Option qui permet d'appeler la méthoe de façon récursive
+     * @param recusive : Option qui permet d'appeler la méthode de façon récursive
      */
     public void addLstEnf(Sensor s, Map<Integer, List<Sensor>> arbre, boolean recusive) {
         if (arbre.containsKey(s.getDepth())) {
@@ -62,7 +62,7 @@ public class LstTab {
     }
 
     /**
-     * Fonction qui permet d'obtenir la moyenne d'au arbre
+     * Fonction qui permet d'obtenir la moyenne d'un arbre
      *
      * @return : La moyenne de l'arbre
      */

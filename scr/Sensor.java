@@ -10,7 +10,7 @@ public class Sensor extends Node {
 
     private ArrayList<Sensor> lstChild = new ArrayList<Sensor>();
     private int nbReturnChild = 0; // compteur du nombre de ReturnChild
-    private int depth = 1; // Nombre de descendant totale
+    private int depth = 1; // Nombre de descendants total
 
     /**
      * Getter getDepth
@@ -41,7 +41,8 @@ public class Sensor extends Node {
                 // enter the tree
                 parent = message.getSender();
                 getCommonLinkWith(parent).setWidth(4);
-                // Envoie du message "INIT" à tous ceux qui n'ont pas de parent, diminuer les messages en trop
+                // Envoie du message "INIT" à tous ceux qui n'ont pas de parent,
+                // permet de diminuer les messages en trop
                 for (Node neighbors : this.getNeighbors()) {
                     if (neighbors instanceof Sensor)
                         if (((Sensor) neighbors).parent == null)
@@ -65,20 +66,19 @@ public class Sensor extends Node {
                             lstChild.add((Sensor) n);
                 for (Sensor s : lstChild)
                     send(s, message);
-                // Cas d'une feuille, commence le rappatriement des informations de l'eploration
+                // Cas d'une feuille, commence le rapatriement des informations de l'exploration
                 if (lstChild.size() == 0)
-                    send(parent, new Message(null, "ReturnChild"));
+                    send(parent, new Message(null, "RETURNCHILD"));
             }
-
-        } else if (message.getFlag().equals("ReturnChild")) {
-            // Vérifie que tous les enfants existant ont terminer l'exploration de leurs enfants
+        } else if (message.getFlag().equals("RETURNCHILD")) {
+            // Vérifie que tous les enfants existants ont terminé l'exploration de leurs enfantsV
             if (nbReturnChild != lstChild.size())
                 nbReturnChild++;
             if (nbReturnChild == lstChild.size()) {
-                // Calcul de la profondeur du noeurd (nombre toral d'enfant et sous enfant)
+                // Calcul de la profondeur du noeud (nombre total d'enfants et sous-enfants)
                 for (Sensor s : lstChild)
                     depth += s.depth;
-                send(parent, new Message(null, "ReturnChild"));
+                send(parent, new Message(null, "RETURNCHILD"));
             }
         }
     }
@@ -90,7 +90,7 @@ public class Sensor extends Node {
             battery--;
             updateColor();
         } else {
-            System.out.print("end " + getID() + " ");
+            //System.out.println("DEAD end " + getID() + " ");
         }
     }
 
